@@ -1,0 +1,30 @@
+#!/bin/bash
+if [ $HOME != "/root" ]
+then
+  echo "This script needs to be run as root, not sudo or regular user"
+  exit 1
+fi
+
+touch /etc/systemd/system/g4-fandriver.service
+echo "[Unit]
+Description=PPC Fan Driver
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=root
+ExecStart=/usr/bin/fandriver
+
+[Install]
+WantedBy=multi-user.target" > /etc/systemd/system/fandriver.service
+cp driver /usr/bin/fandriver
+mkdir /etc/g4-fandriver
+echo 52 > /etc/g4-fandriver/target1.conf
+echo 50 > /etc/g4-fandriver/target2.conf
+systemctl start fandriver
+systemctl enable fandriver
+echo "Fan driver installed and running!"
+echo "Check the fan driver status using systemctl status fandriver"
